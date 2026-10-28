@@ -267,15 +267,7 @@ const [editStockType, setEditStockType] =
       顧客名：
       {selectedCustomer.customer_name}
     </p>
-    <h3 className="font-bold mt-4 mb-2">
-  ボトル追加
-</h3>
-<input
-  value={bottleSearch}
-  onChange={(e) => setBottleSearch(e.target.value)}
-  placeholder="ボトル名・銘柄・指名で検索"
-  className="border rounded p-2 w-full mb-3"
-/>
+
 <input
   value={bottleName}
   onChange={(e) => setBottleName(e.target.value)}
@@ -346,19 +338,31 @@ const [editStockType, setEditStockType] =
     )}
 
 {bottles
-  .filter((bottle) =>
-    bottle.bottle_name
-      ?.toLowerCase()
-      .includes(bottleSearch.toLowerCase()) ||
+  .filter((bottle) => {
+    const keyword = bottleSearch.toLowerCase()
 
-    bottle.brand
-      ?.toLowerCase()
-      .includes(bottleSearch.toLowerCase()) ||
+    return (
+      bottle.bottle_name
+        ?.toLowerCase()
+        .includes(keyword) ||
 
-    bottle.hostess
-      ?.toLowerCase()
-      .includes(bottleSearch.toLowerCase())
-  )
+      bottle.brand
+        ?.toLowerCase()
+        .includes(keyword) ||
+
+      bottle.hostess
+        ?.toLowerCase()
+        .includes(keyword) ||
+
+      String(bottle.stock_value || '')
+        .toLowerCase()
+        .includes(keyword) ||
+
+      String(bottle.stock_type || '')
+        .toLowerCase()
+        .includes(keyword)
+    )
+  })
   .map((bottle) => (
   <div
     key={bottle.id}
