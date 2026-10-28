@@ -1,0 +1,186 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+
+type Customer = {
+  id: number
+  customer_id: string
+  customer_name: string
+}
+
+export default function Home() {
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [customerName, setCustomerName] = useState('')
+
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<Customer | null>(null)
+
+  const [bottleName, setBottleName] = useState('')
+  const [hostess, setHostess] = useState('')
+  const [brand, setBrand] = useState('')
+  const [lastVisit, setLastVisit] = useState('')
+  const [stockType, setStockType] = useState('gram')
+  const [stockValue, setStockValue] = useState('')
+
+  console.log('selectedCustomer', selectedCustomer)
+
+  useEffect(() => {
+    loadCustomers()
+  }, [])
+
+  async function loadCustomers() {
+    const { data } = await supabase
+      .from('customers')
+      .select('*')
+      .order('customer_id')
+
+    setCustomers(data || [])
+  }
+
+  async function addCustomer() {
+    if (!customerName) return
+
+    const nextNumber = customers.length + 1
+
+    const customerId =
+      'C' + String(nextNumber).padStart(4, '0')
+
+    const { error } = await supabase
+      .from('customers')
+      .insert({
+        customer_id: customerId,
+        customer_name: customerName,
+      })
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    setCustomerName('')
+    loadCustomers()
+  }
+
+  async function addBottle() {
+    if (!selectedCustomer) {
+      alert('顧客を選択してください')
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('bottles')
+      .insert({
+        customer_id: selectedCustomer.customer_id,
+        bottle_name: bottleName,
+        hostess,
+        brand,
+        last_visit: lastVisit,
+        stock_type: stockType,
+        stock_value: stockValue,
+      })
+      .select()
+
+    console.log(data)
+    console.log(error)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    alert('ボトル登録完了')
+
+    setBottleName('')
+    setHostess('')
+    setBrand('')
+    setLastVisit('')
+    setStockValue('')
+  }
+
+  return (
+    <main className="p-5 max-w-lg mx-auto">
+
+      <h1 className="text-3xl font-bold mb-5">
+        キープボトル管理
+      </h1>
+
+      <div className="border rounded p-4 mb-6">
+
+        <h2 className="font-bold mb-3">
+          顧客追加
+        </h2>
+
+        <input
+          value={customerName}
+          onChange={(e) =>
+            setCustomerName(e.target.value)
+          }
+          placeholder="顧客名"
+          className="border rounded p-2 w-full mb-3"
+        />
+
+        <button
+          onClick={addCustomer}
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          登録
+        </button>
+
+      </div>
+
+      <h2 className="font-bold text-xl mb-3">
+        顧客一覧
+      </h2>
+
+      <p className="text-red-500 mb-3">
+        選択中：
+        {selectedCustomer?.customer_name || 'なし'}
+      </p>
+
+      {customers.map((customer) => (
+        <div
+          key={customer.id}
+          className="border rounded p-3 mb-2"
+        >
+          <div>{customer.customer_id}</div>
+
+          <div>{customer.customer_name}</div>
+
+          <button
+            onClick={() => {
+              alert(customer.customer_name)
+              setSelectedCustomer(customer)
+            }}
+            className="bg-gray-600 text-white px-3 py-1 rounded mt-2"
+          >
+            詳細
+          </button>
+
+        </div>
+      ))}
+
+{selectedCustomer && (
+  <div
+    style={{
+      backgroundColor: 'yellow',
+      padding: '20px',
+      marginTop: '20px',
+      border: '3px solid red'
+    }}
+  >
+    <h1>顧客詳細テスト</h1>
+
+    <p>
+      {selectedCustomer.customer_id}
+    </p>
+
+    <p>
+      {selectedCustomer.customer_name}
+    </p>
+
+    </div>
+      )}
+    </main>
+  )
+}
