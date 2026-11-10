@@ -12,6 +12,8 @@ type Customer = {
 
 export default function SearchPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [debugText, setDebugText] =
+  useState('')
   const [searchText, setSearchText] = useState('')
   const [selectedCustomer, setSelectedCustomer] =
   useState<Customer | null>(null)
@@ -62,8 +64,12 @@ const [stockValue, setStockValue] =
       .select('*')
       .order('customer_id')
   
-    console.log('customers data', data)
-    console.log('customers error', error)
+    setDebugText(
+      JSON.stringify({
+        data,
+        error,
+      })
+    )
   
     setCustomers(data || [])
   }
@@ -199,6 +205,9 @@ const [stockValue, setStockValue] =
       <h1 className="text-3xl font-bold mb-5">
         検索・編集
       </h1>
+      <div className="text-xs text-red-500 mb-3">
+  {debugText}
+</div>
       <button
   onClick={() =>
     setShowNewCustomer(true)
