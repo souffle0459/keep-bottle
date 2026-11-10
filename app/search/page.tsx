@@ -22,6 +22,11 @@ const [editBottleId, setEditBottleId] =
 
 const [editStockValue, setEditStockValue] =
   useState('')
+  const [showNewCustomer, setShowNewCustomer] =
+  useState(false)
+
+const [customerName, setCustomerName] =
+  useState('')
 
 const [editStockType, setEditStockType] =
   useState('gram')
@@ -136,6 +141,54 @@ const [stockValue, setStockValue] =
   
     loadBottles(selectedCustomer.customer_id)
   }
+  async function addCustomerAndBottle() {
+    const nextNumber = customers.length + 1
+  
+    const customerId =
+      'C' + String(nextNumber).padStart(4, '0')
+  
+    const { error: customerError } =
+      await supabase
+        .from('customers')
+        .insert({
+          customer_id: customerId,
+          customer_name: customerName,
+        })
+  
+    if (customerError) {
+      alert(customerError.message)
+      return
+    }
+  
+    const { error: bottleError } =
+      await supabase
+        .from('bottles')
+        .insert({
+          customer_id: customerId,
+          bottle_name: bottleName,
+          hostess,
+          brand,
+          last_visit: lastVisit,
+          stock_type: stockType,
+          stock_value: stockValue,
+        })
+  
+    if (bottleError) {
+      alert(bottleError.message)
+      return
+    }
+  
+    setShowNewCustomer(false)
+  
+    setCustomerName('')
+    setBottleName('')
+    setHostess('')
+    setBrand('')
+    setLastVisit('')
+    setStockValue('')
+  
+    loadCustomers()
+  }
 
   return (
     <main className="p-4 max-w-4xl mx-auto">
@@ -143,6 +196,107 @@ const [stockValue, setStockValue] =
       <h1 className="text-3xl font-bold mb-5">
         検索・編集
       </h1>
+      <button
+  onClick={() =>
+    setShowNewCustomer(true)
+  }
+  className="bg-green-700 text-white px-4 py-3 rounded-lg mb-4"
+>
+  新規顧客＋ボトル登録
+</button>
+
+{showNewCustomer && (
+  <div className="border p-4 rounded bg-green-50 mb-4">
+
+    <h3 className="font-bold mb-3 text-black">
+      新規顧客＋ボトル登録
+    </h3>
+
+    <input
+      value={customerName}
+      onChange={(e) =>
+        setCustomerName(e.target.value)
+      }
+      placeholder="顧客名"
+      className="border p-2 w-full mb-2 text-black"
+    />
+
+    <input
+      value={bottleName}
+      onChange={(e) =>
+        setBottleName(e.target.value)
+      }
+      placeholder="ボトル名"
+      className="border p-2 w-full mb-2 text-black"
+    />
+
+    <input
+      value={hostess}
+      onChange={(e) =>
+        setHostess(e.target.value)
+      }
+      placeholder="指名"
+      className="border p-2 w-full mb-2 text-black"
+    />
+
+    <input
+      value={brand}
+      onChange={(e) =>
+        setBrand(e.target.value)
+      }
+      placeholder="銘柄"
+      className="border p-2 w-full mb-2 text-black"
+    />
+
+    <input
+      type="date"
+      value={lastVisit}
+      onChange={(e) =>
+        setLastVisit(e.target.value)
+      }
+      className="border p-2 w-full mb-2 text-black"
+    />
+
+    <select
+      value={stockType}
+      onChange={(e) =>
+        setStockType(e.target.value)
+      }
+      className="border p-2 w-full mb-2 text-black"
+    >
+      <option value="gram">
+        残量(g)
+      </option>
+
+      <option value="regularShelf">
+        通常棚
+      </option>
+
+      <option value="vipShelf">
+        常連棚
+      </option>
+    </select>
+
+    {stockType === 'gram' && (
+      <input
+        value={stockValue}
+        onChange={(e) =>
+          setStockValue(e.target.value)
+        }
+        placeholder="残量(g)"
+        className="border p-2 w-full mb-2 text-black"
+      />
+    )}
+
+    <button
+      onClick={addCustomerAndBottle}
+      className="bg-green-600 text-white px-4 py-2 rounded"
+    >
+      登録
+    </button>
+
+  </div>
+)}
 
       <input
         value={searchText}
@@ -406,12 +560,7 @@ const [stockValue, setStockValue] =
           </div>
         ))}
 
-      <Link
-        href="/"
-        className="block bg-gray-600 text-white text-center p-4 rounded-lg mt-6"
-      >
-        登録画面へ戻る
-      </Link>
+      
 
     </main>
   )
