@@ -199,9 +199,7 @@ const [stockValue, setStockValue] =
       <h1 className="text-3xl font-bold mb-5">
         検索・編集
       </h1>
-      <p>
-  顧客数: {customers.length}
-</p>
+      
       
       <button
   onClick={() =>
