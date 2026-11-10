@@ -246,6 +246,36 @@ const [stockValue, setStockValue] =
       }
       className="border p-2 w-full mb-2"
     />
+    <select
+  value={stockType}
+  onChange={(e) =>
+    setStockType(e.target.value)
+  }
+  className="border p-2 w-full mb-2"
+>
+  <option value="gram">
+    残量(g)
+  </option>
+
+  <option value="regularShelf">
+    通常棚
+  </option>
+
+  <option value="vipShelf">
+    常連棚
+  </option>
+</select>
+
+{stockType === 'gram' && (
+  <input
+    value={stockValue}
+    onChange={(e) =>
+      setStockValue(e.target.value)
+    }
+    placeholder="残量(g)"
+    className="border p-2 w-full mb-2"
+  />
+)}
 
     <button
       onClick={addBottle}
