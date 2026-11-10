@@ -57,11 +57,14 @@ const [stockValue, setStockValue] =
   }, [])
 
   async function loadCustomers() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('customers')
       .select('*')
       .order('customer_id')
-
+  
+    console.log('customers data', data)
+    console.log('customers error', error)
+  
     setCustomers(data || [])
   }
   async function loadBottles(customerId: string) {
