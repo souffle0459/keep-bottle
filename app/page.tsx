@@ -462,9 +462,18 @@ const [editStockType, setEditStockType] =
 
   </div>
 )}
-  </div>
+</div>
 )}
 
+<div className="mt-6">
+  <a
+    href="/search"
+    className="block bg-blue-600 text-white text-center p-4 rounded-lg"
+  >
+    検索・編集へ
+  </a>
+</div>
+
 </main>
-  )
+)
 }
