@@ -21,6 +21,8 @@ export default function SearchPage() {
 const [bottles, setBottles] = useState<any[]>([])
 const [editBottleId, setEditBottleId] =
   useState<number | null>(null)
+  const [editHostess, setEditHostess] =
+  useState('')
 
 const [editStockValue, setEditStockValue] =
   useState('')
@@ -192,7 +194,30 @@ const [stockValue, setStockValue] =
   
     loadCustomers()
   }
-
+  async function updateHostess() {
+    if (!selectedCustomer) return
+  
+    const { error } = await supabase
+      .from('customers')
+      .update({
+        hostess: editHostess,
+      })
+      .eq('id', selectedCustomer.id)
+  
+    if (error) {
+      alert(error.message)
+      return
+    }
+  
+    loadCustomers()
+  
+    setSelectedCustomer({
+      ...selectedCustomer,
+      hostess: editHostess,
+    })
+  
+    alert('担当キャストを更新しました')
+  }
   return (
     <main className="p-4 max-w-4xl mx-auto">
 
@@ -349,6 +374,20 @@ const [stockValue, setStockValue] =
   担当：
   {selectedCustomer.hostess || '未登録'}
 </p>
+<button
+  onClick={updateHostess}
+  className="bg-blue-600 text-white px-3 py-2 rounded mb-4"
+>
+  担当保存
+</button>
+<input
+  value={editHostess}
+  onChange={(e) =>
+    setEditHostess(e.target.value)
+  }
+  placeholder="担当キャスト"
+  className="border p-2 w-full mb-2 text-black"
+/>
 
       <button
         onClick={() => setSelectedCustomer(null)}
@@ -551,10 +590,11 @@ const [stockValue, setStockValue] =
 )}
 
             <button
-  onClick={() => {
-    setSelectedCustomer(customer)
-    loadBottles(customer.customer_id)
-  }}
+ onClick={() => {
+  setSelectedCustomer(customer)
+  setEditHostess(customer.hostess || '')
+  loadBottles(customer.customer_id)
+}}
   className="bg-blue-600 text-white px-4 py-2 rounded mt-2"
 >
   詳細
