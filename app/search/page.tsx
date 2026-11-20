@@ -8,6 +8,7 @@ type Customer = {
   id: number
   customer_id: string
   customer_name: string
+  hostess: string | null
 }
 
 export default function SearchPage() {
@@ -122,7 +123,6 @@ const [stockValue, setStockValue] =
       .insert({
         customer_id: selectedCustomer.customer_id,
         bottle_name: bottleName,
-        hostess,
         brand,
         last_visit: lastVisit,
         stock_type: stockType,
@@ -156,6 +156,7 @@ const [stockValue, setStockValue] =
         .insert({
           customer_id: customerId,
           customer_name: customerName,
+          hostess,
         })
   
     if (customerError) {
@@ -169,7 +170,6 @@ const [stockValue, setStockValue] =
         .insert({
           customer_id: customerId,
           bottle_name: bottleName,
-          hostess,
           brand,
           last_visit: lastVisit,
           stock_type: stockType,
@@ -225,6 +225,14 @@ const [stockValue, setStockValue] =
       placeholder="顧客名"
       className="border p-2 w-full mb-2 text-black"
     />
+    <input
+  value={hostess}
+  onChange={(e) =>
+    setHostess(e.target.value)
+  }
+  placeholder="担当キャスト"
+  className="border p-2 w-full mb-2 text-black"
+/>
 
     <input
       value={bottleName}
@@ -235,14 +243,7 @@ const [stockValue, setStockValue] =
       className="border p-2 w-full mb-2 text-black"
     />
 
-    <input
-      value={hostess}
-      onChange={(e) =>
-        setHostess(e.target.value)
-      }
-      placeholder="指名"
-      className="border p-2 w-full mb-2 text-black"
-    />
+    
 
     <input
       value={brand}
@@ -326,21 +327,28 @@ const [stockValue, setStockValue] =
             key={customer.id}
             className="border rounded-xl p-4 mb-3"
           >
-            <div>
-              {customer.customer_id}
-            </div>
+           <div className="font-bold text-lg">
+  {customer.customer_name}
+</div>
 
-            <div>
-              {customer.customer_name}
-            </div>
+<div className="text-sm text-gray-500">
+  顧客番号：
+  {customer.customer_id}
+</div>
+
+<div className="text-sm text-gray-500">
+  担当：
+  {customer.hostess || '未登録'}
+</div>
             {selectedCustomer && (
   <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
 
     <div className="bg-white text-black w-full max-w-md rounded-xl p-5">
 
-      <h2 className="text-xl font-bold mb-3">
-        {selectedCustomer.customer_name}
-      </h2>
+    <p className="mb-3">
+  担当：
+  {selectedCustomer.hostess || '未登録'}
+</p>
 
       <button
         onClick={() => setSelectedCustomer(null)}
@@ -379,14 +387,7 @@ const [stockValue, setStockValue] =
       className="border p-2 w-full mb-2"
     />
 
-    <input
-      value={hostess}
-      onChange={(e) =>
-        setHostess(e.target.value)
-      }
-      placeholder="指名"
-      className="border p-2 w-full mb-2"
-    />
+  
 
     <input
       value={brand}
@@ -461,10 +462,6 @@ const [stockValue, setStockValue] =
             {bottle.brand}
           </div>
 
-          <div>
-            指名：
-            {bottle.hostess}
-          </div>
 
           <div>
             状態：
