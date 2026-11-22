@@ -13,34 +13,14 @@ type Customer = {
 
 export default function SearchPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
- 
   const [searchText, setSearchText] = useState('')
   const [selectedCustomer, setSelectedCustomer] =
   useState<Customer | null>(null)
-
-const [bottles, setBottles] = useState<any[]>([])
-const [editBottleId, setEditBottleId] =
-  useState<number | null>(null)
-  const [editHostess, setEditHostess] =
-  useState('')
-
-const [editStockValue, setEditStockValue] =
-  useState('')
-  const [showNewCustomer, setShowNewCustomer] =
-  useState(false)
-
-const [customerName, setCustomerName] =
-  useState('')
-
-const [editStockType, setEditStockType] =
-  useState('gram')
+  const [bottles, setBottles] = useState<any[]>([])
   const [showAddBottle, setShowAddBottle] =
   useState(false)
 
 const [bottleName, setBottleName] =
-  useState('')
-
-const [hostess, setHostess] =
   useState('')
 
 const [brand, setBrand] =
@@ -57,20 +37,18 @@ const [stockValue, setStockValue] =
 
   useEffect(() => {
     loadCustomers()
-
   }, [])
 
   async function loadCustomers() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('customers')
       .select('*')
       .order('customer_id')
-  
-    
-  
+
     setCustomers(data || [])
   }
   async function loadBottles(customerId: string) {
+
     const { data } = await supabase
       .from('bottles')
       .select('*')
@@ -78,42 +56,31 @@ const [stockValue, setStockValue] =
   
     setBottles(data || [])
   }
-  async function deleteBottle(id: number) {
+  async function addBottle() {
     if (!selectedCustomer) return
   
-    const result = confirm('削除しますか？')
-  
-    if (!result) return
-  
     const { error } = await supabase
       .from('bottles')
-      .delete()
-      .eq('id', id)
-  
-    if (error) {
-      alert(error.message)
-      return
-    }
-  
-    loadBottles(selectedCustomer.customer_id)
-  }
-  async function updateBottle() {
-    if (!editBottleId || !selectedCustomer) return
-  
-    const { error } = await supabase
-      .from('bottles')
-      .update({
-        stock_value: editStockValue,
-        stock_type: editStockType,
+      .insert({
+        customer_id: selectedCustomer.customer_id,
+        bottle_name: bottleName,
+        brand,
+        last_visit: lastVisit,
+        stock_type: stockType,
+        stock_value: stockValue,
       })
-      .eq('id', editBottleId)
   
     if (error) {
       alert(error.message)
       return
     }
   
-    setEditBottleId(null)
+    alert('ボトル登録完了')
+  
+    setBottleName('')
+    setBrand('')
+    setLastVisit('')
+    setStockValue('')
   
     loadBottles(selectedCustomer.customer_id)
   }
@@ -136,87 +103,14 @@ const [stockValue, setStockValue] =
       return
     }
   
-    setShowAddBottle(false)
+    alert('ボトル登録完了')
   
     setBottleName('')
-    setHostess('')
     setBrand('')
     setLastVisit('')
     setStockValue('')
   
     loadBottles(selectedCustomer.customer_id)
-  }
-  async function addCustomerAndBottle() {
-    const nextNumber = customers.length + 1
-  
-    const customerId =
-      'C' + String(nextNumber).padStart(4, '0')
-  
-    const { error: customerError } =
-      await supabase
-        .from('customers')
-        .insert({
-          customer_id: customerId,
-          customer_name: customerName,
-          hostess,
-        })
-  
-    if (customerError) {
-      alert(customerError.message)
-      return
-    }
-  
-    const { error: bottleError } =
-      await supabase
-        .from('bottles')
-        .insert({
-          customer_id: customerId,
-          bottle_name: bottleName,
-          brand,
-          last_visit: lastVisit,
-          stock_type: stockType,
-          stock_value: stockValue,
-        })
-  
-    if (bottleError) {
-      alert(bottleError.message)
-      return
-    }
-  
-    setShowNewCustomer(false)
-  
-    setCustomerName('')
-    setBottleName('')
-    setHostess('')
-    setBrand('')
-    setLastVisit('')
-    setStockValue('')
-  
-    loadCustomers()
-  }
-  async function updateHostess() {
-    if (!selectedCustomer) return
-  
-    const { error } = await supabase
-      .from('customers')
-      .update({
-        hostess: editHostess,
-      })
-      .eq('id', selectedCustomer.id)
-  
-    if (error) {
-      alert(error.message)
-      return
-    }
-  
-    loadCustomers()
-  
-    setSelectedCustomer({
-      ...selectedCustomer,
-      hostess: editHostess,
-    })
-  
-    alert('担当キャストを更新しました')
   }
   return (
     <main className="p-4 max-w-4xl mx-auto">
@@ -224,110 +118,6 @@ const [stockValue, setStockValue] =
       <h1 className="text-3xl font-bold mb-5">
         検索・編集
       </h1>
-      
-      
-      <button
-  onClick={() =>
-    setShowNewCustomer(true)
-  }
-  className="bg-green-700 text-white px-4 py-3 rounded-lg mb-4"
->
-  新規顧客＋ボトル登録
-</button>
-
-{showNewCustomer && (
-  <div className="border p-4 rounded bg-green-50 mb-4">
-
-    <h3 className="font-bold mb-3 text-black">
-      新規顧客＋ボトル登録
-    </h3>
-
-    <input
-      value={customerName}
-      onChange={(e) =>
-        setCustomerName(e.target.value)
-      }
-      placeholder="顧客名"
-      className="border p-2 w-full mb-2 text-black"
-    />
-    <input
-  value={hostess}
-  onChange={(e) =>
-    setHostess(e.target.value)
-  }
-  placeholder="担当キャスト"
-  className="border p-2 w-full mb-2 text-black"
-/>
-
-    <input
-      value={bottleName}
-      onChange={(e) =>
-        setBottleName(e.target.value)
-      }
-      placeholder="ボトル名"
-      className="border p-2 w-full mb-2 text-black"
-    />
-
-    
-
-    <input
-      value={brand}
-      onChange={(e) =>
-        setBrand(e.target.value)
-      }
-      placeholder="銘柄"
-      className="border p-2 w-full mb-2 text-black"
-    />
-
-    <input
-      type="date"
-      value={lastVisit}
-      onChange={(e) =>
-        setLastVisit(e.target.value)
-      }
-      className="border p-2 w-full mb-2 text-black"
-    />
-
-    <select
-      value={stockType}
-      onChange={(e) =>
-        setStockType(e.target.value)
-      }
-      className="border p-2 w-full mb-2 text-black"
-    >
-      <option value="gram">
-        残量(g)
-      </option>
-
-      <option value="regularShelf">
-        通常棚
-      </option>
-
-      <option value="vipShelf">
-        常連棚
-      </option>
-    </select>
-
-    {stockType === 'gram' && (
-      <input
-        value={stockValue}
-        onChange={(e) =>
-          setStockValue(e.target.value)
-        }
-        placeholder="残量(g)"
-        className="border p-2 w-full mb-2 text-black"
-      />
-    )}
-
-    <button
-      onClick={addCustomerAndBottle}
-      className="bg-green-600 text-white px-4 py-2 rounded"
-    >
-      登録
-    </button>
-
-  </div>
-)}
 
       <input
         value={searchText}
@@ -352,70 +142,65 @@ const [stockValue, setStockValue] =
             key={customer.id}
             className="border rounded-xl p-4 mb-3"
           >
-           <div className="font-bold text-lg">
-  {customer.customer_name}
+           <div>
+  {customer.customer_id}
 </div>
 
-<div className="text-sm text-gray-500">
-  顧客番号：
-  {customer.customer_id}
+<div>
+  {customer.customer_name}
 </div>
 
 <div className="text-sm text-gray-500">
   担当：
   {customer.hostess || '未登録'}
 </div>
-            {selectedCustomer && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
 
+<button
+  onClick={() => {
+    setSelectedCustomer(customer)
+    loadBottles(customer.customer_id)
+  }}
+  className="bg-blue-600 text-white px-4 py-2 rounded mt-2"
+>
+  詳細
+</button>
+          </div>
+        ))}
+{selectedCustomer && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
     <div className="bg-white text-black w-full max-w-md rounded-xl p-5">
 
-    <p className="mb-3">
+      <h2 className="text-xl font-bold mb-3">
+        {selectedCustomer.customer_name}
+      </h2>
+      <p className="mb-3">
   担当：
   {selectedCustomer.hostess || '未登録'}
 </p>
-<button
-  onClick={updateHostess}
-  className="bg-blue-600 text-white px-3 py-2 rounded mb-4"
->
-  担当保存
-</button>
-<input
-  value={editHostess}
-  onChange={(e) =>
-    setEditHostess(e.target.value)
-  }
-  placeholder="担当キャスト"
-  className="border p-2 w-full mb-2 text-black"
-/>
+
+      <p className="mb-3">
+        顧客番号：
+        {selectedCustomer.customer_id}
+      
+      </p>
 
       <button
         onClick={() => setSelectedCustomer(null)}
-        className="bg-gray-500 text-white px-3 py-2 rounded mb-4"
+        className="bg-gray-500 text-white px-3 py-2 rounded"
       >
         閉じる
-      </button>
 
-      <h3 className="font-bold mb-3">
-        登録ボトル
-      </h3>
+      </button>
       <button
-  onClick={() => setShowAddBottle(true)}
+  onClick={() =>
+    setShowAddBottle(true)
+  }
   className="bg-green-600 text-white px-4 py-2 rounded mb-3"
 >
   ボトル追加
 </button>
-
-      {bottles.length === 0 && (
-    
-        <p>登録ボトルなし</p>
-      )}
-      {showAddBottle && (
+{showAddBottle && (
   <div className="border p-4 rounded bg-green-50 mb-4">
-
-    <h4 className="font-bold mb-3">
-      ボトル追加
-    </h4>
 
     <input
       value={bottleName}
@@ -423,10 +208,8 @@ const [stockValue, setStockValue] =
         setBottleName(e.target.value)
       }
       placeholder="ボトル名"
-      className="border p-2 w-full mb-2"
+      className="border p-2 w-full mb-2 text-black"
     />
-
-  
 
     <input
       value={brand}
@@ -434,175 +217,49 @@ const [stockValue, setStockValue] =
         setBrand(e.target.value)
       }
       placeholder="銘柄"
-      className="border p-2 w-full mb-2"
+      className="border p-2 w-full mb-2 text-black"
     />
-
-    <input
-      type="date"
-      value={lastVisit}
-      onChange={(e) =>
-        setLastVisit(e.target.value)
-      }
-      className="border p-2 w-full mb-2"
-    />
-    <select
-  value={stockType}
-  onChange={(e) =>
-    setStockType(e.target.value)
-  }
-  className="border p-2 w-full mb-2"
->
-  <option value="gram">
-    残量(g)
-  </option>
-
-  <option value="regularShelf">
-    通常棚
-  </option>
-
-  <option value="vipShelf">
-    常連棚
-  </option>
-</select>
-
-{stockType === 'gram' && (
-  <input
-    value={stockValue}
-    onChange={(e) =>
-      setStockValue(e.target.value)
-    }
-    placeholder="残量(g)"
-    className="border p-2 w-full mb-2"
-  />
-)}
 
     <button
       onClick={addBottle}
-      className="bg-green-600 text-white px-3 py-2 rounded"
+      className="bg-green-600 text-white px-4 py-2 rounded"
     >
       登録
     </button>
 
   </div>
 )}
+      <h3 className="font-bold mt-4 mb-2">
+  登録ボトル
+</h3>
 
-      {bottles.map((bottle) => (
-        <div
-          key={bottle.id}
-          className="border rounded p-3 mb-2"
-        >
-          <div>
-            ボトル名：
-            {bottle.bottle_name}
-          </div>
-
-          <div>
-            銘柄：
-            {bottle.brand}
-          </div>
-
-
-          <div>
-            状態：
-            {bottle.stock_type === 'gram'
-  ? `${bottle.stock_value}g`
-  : bottle.stock_type === 'vipShelf'
-  ? '常連棚'
-  : '通常棚'}
-          </div>
-          <div className="flex gap-2 mt-3">
-
-  <button
-    onClick={() => {
-      setEditBottleId(bottle.id)
-      setEditStockValue(
-        bottle.stock_value || ''
-      )
-      setEditStockType(
-        bottle.stock_type || 'gram'
-      )
-    }}
-    className="bg-blue-600 text-white px-3 py-1 rounded"
-  >
-    編集
-  </button>
-
-  <button
-    onClick={() => deleteBottle(bottle.id)}
-    className="bg-red-600 text-white px-3 py-1 rounded"
-  >
-    削除
-  </button>
-
-</div>
-        </div>
-      ))}
-      {editBottleId && (
-  <div className="border p-4 rounded bg-blue-50 mt-3">
-
-    <h4 className="font-bold mb-2 text-black">
-      状態編集
-    </h4>
-
-    <select
-      value={editStockType}
-      onChange={(e) =>
-        setEditStockType(e.target.value)
-      }
-      className="border p-2 mb-2 mr-2 text-black"
+{bottles.length === 0 ? (
+  <p>登録ボトルなし</p>
+) : (
+  bottles.map((bottle) => (
+    <div
+      key={bottle.id}
+      className="border rounded p-2 mb-2"
     >
-    <option value="gram">
-  残量(g)
-</option>
+      <div>
+        {bottle.bottle_name}
+      </div>
 
-<option value="regularShelf">
-  通常棚
-</option>
-
-<option value="vipShelf">
-  常連棚
-</option>
-    </select>
-
-    {editStockType === 'gram' && (
-  <input
-    value={editStockValue}
-    onChange={(e) =>
-      setEditStockValue(e.target.value)
-    }
-    className="border p-2 mr-2 text-black"
-  />
-)}
-
-    <button
-      onClick={updateBottle}
-      className="bg-green-600 text-white px-3 py-2 rounded"
-    >
-      保存
-    </button>
-
-  </div>
-)}
-
+      <div className="text-sm text-gray-500">
+        {bottle.brand}
+      </div>
     </div>
-
+  ))
+)}
+    </div>
   </div>
 )}
-
-            <button
- onClick={() => {
-  setSelectedCustomer(customer)
-  setEditHostess(customer.hostess || '')
-  loadBottles(customer.customer_id)
-}}
-  className="bg-blue-600 text-white px-4 py-2 rounded mt-2"
->
-  詳細
-</button>
-          </div>
-        ))}
-
-      
+      <Link
+        href="/"
+        className="block bg-gray-600 text-white text-center p-4 rounded-lg mt-6"
+      >
+        登録画面へ戻る
+      </Link>
 
     </main>
   )
