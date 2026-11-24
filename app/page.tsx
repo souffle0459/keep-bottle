@@ -47,6 +47,13 @@ const [editHostess, setEditHostess] =
     }, [])
     
     async function loadCustomers() {
+
+      alert(
+        `URL=${process.env.NEXT_PUBLIC_SUPABASE_URL}
+    
+    KEY=${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20)}`
+      )
+    
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -54,6 +61,7 @@ const [editHostess, setEditHostess] =
     
       alert(
         `data=${data?.length || 0}
+    
     error=${error?.message || 'なし'}`
       )
     
