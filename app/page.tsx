@@ -46,37 +46,14 @@ const [editHostess, setEditHostess] =
       loadCustomers()
     }, [])
     
-    async function loadCustomers() {
-      try {
-    
+    async function loadCustomers() {  
         const { data, error } = await supabase
           .from('customers')
           .select('*')
           .order('customer_id')
     
-        if (error) {
-          alert(
-            'Supabase Error: ' +
-            JSON.stringify(error)
-          )
-          return
-        }
-    
-        alert(
-          '取得件数: ' +
-          (data?.length || 0)
-        )
-    
         setCustomers(data || [])
-    
-      } catch (e) {
-    
-        alert(
-          'Catch Error: ' +
-          JSON.stringify(e)
-        )
-    
-      }
+  
     }
     
     
