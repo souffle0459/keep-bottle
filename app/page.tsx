@@ -47,25 +47,36 @@ const [editHostess, setEditHostess] =
     }, [])
     
     async function loadCustomers() {
-
-      alert(
-        `URL=${process.env.NEXT_PUBLIC_SUPABASE_URL}
+      try {
     
-    KEY=${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20)}`
-      )
+        const { data, error } = await supabase
+          .from('customers')
+          .select('*')
+          .order('customer_id')
     
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .order('customer_id')
+        if (error) {
+          alert(
+            'Supabase Error: ' +
+            JSON.stringify(error)
+          )
+          return
+        }
     
-      alert(
-        `data=${data?.length || 0}
+        alert(
+          '取得件数: ' +
+          (data?.length || 0)
+        )
     
-    error=${error?.message || 'なし'}`
-      )
+        setCustomers(data || [])
     
-      setCustomers(data || [])
+      } catch (e) {
+    
+        alert(
+          'Catch Error: ' +
+          JSON.stringify(e)
+        )
+    
+      }
     }
     
     
