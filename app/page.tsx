@@ -47,13 +47,19 @@ const [editHostess, setEditHostess] =
     }, [])
     
     async function loadCustomers() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('customers')
         .select('*')
         .order('customer_id')
     
+      alert(
+        `data=${data?.length || 0}
+    error=${error?.message || 'なし'}`
+      )
+    
       setCustomers(data || [])
     }
+    
     
     async function loadBottles(customerId: string) {
       const { data } = await supabase
